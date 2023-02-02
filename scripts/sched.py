@@ -8,7 +8,7 @@ from modules.sd_hijack import model_hijack
 import gradio as gr
 
 
-def do_schedule(text, steps, count_tokens_step):
+def do_schedule(text, steps, current_step):
 
     #
     # update_token_counter in modules/ui.py
@@ -29,19 +29,19 @@ def do_schedule(text, steps, count_tokens_step):
     ht = []
     md = ''
 
-    prompt_of_count_tokens = None
+    current_prompt = None
     for when, prompt in flat_prompts:
-        if count_tokens_step <= when:
-            prompt_of_count_tokens = prompt
+        if current_step <= when:
+            current_prompt = prompt
             break
 
-    if prompt_of_count_tokens is not None:
+    if current_prompt is not None:
         #
         # in modules/sd_hijack_clip.py
         #
         clip = model_hijack.clip
 
-        batch_chunks, token_count = clip.process_texts([prompt_of_count_tokens])
+        batch_chunks, token_count = clip.process_texts([current_prompt])
 
         # used_embeddings = {}
         chunk_count = max([len(x) for x in batch_chunks])
@@ -58,7 +58,7 @@ def do_schedule(text, steps, count_tokens_step):
                     else:
                         ht.append([token[:-4] if token.endswith('</w>') else token, None])
 
-        md += f'{token_count} tokens at step {count_tokens_step}\n'
+        md += f'{token_count} tokens at step {current_step}\n'
 
     for when, prompt in flat_prompts:
         md += f'### step {when}\n'
@@ -77,14 +77,14 @@ def on_ui_tabs():
             with gr.Column():
                 steps = gr.Slider(minimum=1, maximum=150, step=1, label="Sampling steps", value=20)
             with gr.Column():
-                count_tokens_step = gr.Slider(minimum=1, maximum=150, step=1, label="Count tokens at this step", value=1)
+                current_step = gr.Slider(minimum=1, maximum=150, step=1, label="Count tokens at this step", value=1)
         with gr.Row():
             with gr.Column():
                 schedule_button = gr.Button(value="Schedule", variant="primary")
                 report_ht = gr.HighlightedText().style(color_map={'B': 'green', 'E': 'red'})
                 report_md = gr.Markdown()
 
-        schedule_button.click(fn=do_schedule, inputs=[prompt, steps, count_tokens_step], outputs=[report_ht, report_md])
+        schedule_button.click(fn=do_schedule, inputs=[prompt, steps, current_step], outputs=[report_ht, report_md])
 
     return (demo, "Sched.", "sched"),
 
