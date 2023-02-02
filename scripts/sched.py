@@ -30,8 +30,8 @@ def do_schedule(text, steps, count_tokens_step):
     md = ''
 
     prompt_of_count_tokens = None
-    for step, prompt in flat_prompts:
-        if step >= count_tokens_step:
+    for when, prompt in flat_prompts:
+        if count_tokens_step <= when:
             prompt_of_count_tokens = prompt
             break
 
@@ -60,8 +60,8 @@ def do_schedule(text, steps, count_tokens_step):
 
         md += f'{token_count} tokens at step {count_tokens_step}\n'
 
-    for step, prompt in flat_prompts:
-        md += f'### step {step}\n'
+    for when, prompt in flat_prompts:
+        md += f'### step {when}\n'
         md += prompt
         md += f'\n'
 
