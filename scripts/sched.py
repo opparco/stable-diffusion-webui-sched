@@ -81,7 +81,7 @@ def on_ui_tabs():
         with gr.Row():
             with gr.Column():
                 schedule_button = gr.Button(value="Schedule", variant="primary")
-                report_ht = gr.HighlightedText().style(color_map={'B': 'green', 'E': 'red'})
+                report_ht = gr.HighlightedText(combine_adjacent=True, adjacent_separator=' ', label="CLIP").style(color_map={'B': 'green', 'E': 'red'})
                 report_md = gr.Markdown()
 
         schedule_button.click(fn=do_schedule, inputs=[prompt, steps, current_step], outputs=[report_ht, report_md])
