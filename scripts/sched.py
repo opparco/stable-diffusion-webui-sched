@@ -2,7 +2,7 @@ from functools import partial, reduce
 
 import torch
 
-from modules import extra_networks, script_callbacks, shared
+from modules import extra_networks, script_callbacks
 
 from modules import prompt_parser
 from modules.devices import device, dtype
@@ -138,6 +138,9 @@ def do_schedule(text, steps, current_step):
 def on_model_loaded(sd_model_):
     global sd_model
     global sd_model_betas, sd_model_alphas_cumprod, sd_model_alphas_cumprod_prev
+
+    if sd_model_ == sd_model:
+        return
 
     sd_model = sd_model_
     sd_model_betas = sd_model_.betas.to(device, dtype)
